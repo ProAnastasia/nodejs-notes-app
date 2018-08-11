@@ -1,0 +1,1 @@
+### Simple Node.js console application for work with notes
