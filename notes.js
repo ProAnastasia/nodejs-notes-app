@@ -10,6 +10,7 @@ switch (command) {
   case CommandName.VIEW_LIST:
     getList((error, notes) => {
       if (error) return console.error(error.message);
+
       notes.forEach((note, index) => console.log(`${index + 1}: ${note.title}`));
     });
 
@@ -17,6 +18,7 @@ switch (command) {
   case CommandName.SHOW_ITEM:
     showNote(noteTitle, (error, note) => {
       if (error) return console.error(error.message);
+
       console.log(`# ${note.title}\r\n\r\n---\r\n\r\n${note.content}`);
     });
 
@@ -24,6 +26,7 @@ switch (command) {
   case CommandName.CREATE_ITEM:
     createNote(noteTitle, noteContent, (error) => {
       if (error) return console.error(error.message);
+
       console.log('Заметка создана');
     });
 
@@ -31,6 +34,7 @@ switch (command) {
   case CommandName.REMOVE_ITEM:
     removeNote(noteTitle, (error) => {
       if (error) return console.error(error.message);
+
       console.log('Заметка удалена');
     });
     break;
@@ -49,6 +53,7 @@ function showNote(title, done) {
     const note = notes.find(item => item.title === title);
 
     if (!note) return done(new Error('Заметка не найдена'));
+
     done (null, note);
   });
 }
@@ -83,6 +88,7 @@ function load(done) {
 
     try {
       const notes = JSON.parse(data);
+      
       done(null, notes);
     } catch (error) {
       done(new Error('Ошибка в данных'));
