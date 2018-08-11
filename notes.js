@@ -16,6 +16,12 @@ switch (command) {
 
     break;
   case CommandName.SHOW_ITEM:
+    showNote(noteTitle, (error, note) => {
+      if (error) return console.error(error.message);
+
+      console.log(`# ${note.title}\r\n\r\n---\r\n\r\n${note.content}`);
+    });
+
     break;
   case CommandName.CREATE_ITEM:
     break;
@@ -30,5 +36,18 @@ function getList(done) {
     if (error) done(error);
 
     done (null, JSON.parse(data));
+  });
+}
+
+function showNote(title, done) {
+  fs.readFile(notesList, (error, data) => {
+    if (error) done(error);
+
+    const notes = JSON.parse(data);
+    const note = notes.find(item => item.title === title);
+
+    if (!note) return done(new Error('Заметка не найдена'));
+
+    done (null, note);
   });
 }
