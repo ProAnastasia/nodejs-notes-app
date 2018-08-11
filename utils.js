@@ -18,3 +18,5 @@ exports.ArgumentIndex = {
   NOTE_TITLE_INDEX: 3,
   NOTE_CONTENT_INDEX: 4
 };
+
+exports.notesList = 'notes.json';
