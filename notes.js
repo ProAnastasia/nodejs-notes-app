@@ -10,7 +10,6 @@ switch (command) {
   case CommandName.VIEW_LIST:
     getList((error, notes) => {
       if (error) return console.error(error.message);
-
       notes.forEach((note, index) => console.log(`${index + 1}: ${note.title}`));
     });
 
@@ -18,7 +17,6 @@ switch (command) {
   case CommandName.SHOW_ITEM:
     showNote(noteTitle, (error, note) => {
       if (error) return console.error(error.message);
-
       console.log(`# ${note.title}\r\n\r\n---\r\n\r\n${note.content}`);
     });
 
@@ -26,7 +24,6 @@ switch (command) {
   case CommandName.CREATE_ITEM:
     createNote(noteTitle, noteContent, (error) => {
       if (error) return console.error(error.message);
-
       console.log('Заметка создана');
     });
 
@@ -34,7 +31,6 @@ switch (command) {
   case CommandName.REMOVE_ITEM:
     removeNote(noteTitle, (error) => {
       if (error) return console.error(error.message);
-
       console.log('Заметка удалена');
     });
     break;
@@ -43,52 +39,65 @@ switch (command) {
 }
 
 function getList(done) {
-  fs.readFile(notesList, (error, data) => {
-    if (error) done(error);
-
-    done (null, JSON.parse(data));
-  });
+  load(done);
 }
 
 function showNote(title, done) {
-  fs.readFile(notesList, (error, data) => {
-    if (error) done(error);
+  load((error, notes) => {
+    if (error) return done(error);
 
-    const notes = JSON.parse(data);
     const note = notes.find(item => item.title === title);
 
     if (!note) return done(new Error('Заметка не найдена'));
-
     done (null, note);
   });
 }
 
 function createNote(title, content, done) {
-  fs.readFile(notesList, (error, data) => {
-    if (error) done(error);
-
-    const notes = JSON.parse(data);
+  load((error, notes) => {
+    if (error) return done(error);
 
     notes.push({title, content});
-
-    fs.writeFile(notesList, JSON.stringify(notes), (error) => {
-      if (error) return done(error);
-
-      done();
-    });
-});
+    save(notes, done);
+  });
 }
 
 function removeNote(title, done) {
+  load((error, notes) => {
+    if (error) return done(error);
+
+    notes = notes.filter(item => item.title !== title);
+    save(notes, done);
+});
+}
+
+function load(done) {
   fs.readFile(notesList, (error, data) => {
-    if (error) done(error);
+    if (error) {
+      if (error.code === 'ENOENT') {
+        return done (null, []);
+      } else {
+        return done(error);
+      }
+    }
 
-    const notes = JSON.parse(data).filter(item => item.title !== title);
+    try {
+      const notes = JSON.parse(data);
+      done(null, notes);
+    } catch (error) {
+      done(new Error('Ошибка в данных'));
+    }
+  });
+}
 
-    fs.writeFile(notesList, JSON.stringify(notes), (error) => {
+function save(notes, done) {
+  try {
+    const json = JSON.stringify(notes);
+    fs.writeFile(notesList, json, (error) => {
       if (error) return done(error);
-
       done();
     });
-  });
+  } catch (error) {
+    done(error);
+  }
 }
