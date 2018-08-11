@@ -4,7 +4,7 @@ const {notesList, CommandName, ArgumentIndex } = require('./utils');
 const argv = process.argv;
 const command = argv[ArgumentIndex.COMMAND_INDEX];
 const noteTitle = argv[ArgumentIndex.NOTE_TITLE_INDEX];
-const content = argv[ArgumentIndex.NOTE_CONTENT_INDEX];
+const noteContent = argv[ArgumentIndex.NOTE_CONTENT_INDEX];
 
 switch (command) {
   case CommandName.VIEW_LIST:
@@ -24,11 +24,22 @@ switch (command) {
 
     break;
   case CommandName.CREATE_ITEM:
+    createNote(noteTitle, noteContent, (error) => {
+      if (error) return console.error(error.message);
+
+      console.log('Заметка создана');
+    });
+
     break;
   case CommandName.REMOVE_ITEM:
+    removeNote(noteTitle, (error) => {
+      if (error) return console.error(error.message);
+
+      console.log('Заметка удалена');
+    });
     break;
   default:
-    console.log('Unknown command');
+    console.log('Неизвестная команда');
 }
 
 function getList(done) {
@@ -49,5 +60,35 @@ function showNote(title, done) {
     if (!note) return done(new Error('Заметка не найдена'));
 
     done (null, note);
+  });
+}
+
+function createNote(title, content, done) {
+  fs.readFile(notesList, (error, data) => {
+    if (error) done(error);
+
+    const notes = JSON.parse(data);
+
+    notes.push({title, content});
+
+    fs.writeFile(notesList, JSON.stringify(notes), (error) => {
+      if (error) return done(error);
+
+      done();
+    });
+});
+}
+
+function removeNote(title, done) {
+  fs.readFile(notesList, (error, data) => {
+    if (error) done(error);
+
+    const notes = JSON.parse(data).filter(item => item.title !== title);
+
+    fs.writeFile(notesList, JSON.stringify(notes), (error) => {
+      if (error) return done(error);
+
+      done();
+    });
   });
 }
