@@ -1,5 +1,5 @@
 const fs = require('fs');
-const {notesList, CommandName, ArgumentIndex } = require('./utils');
+const { notesList, CommandName, ArgumentIndex } = require('./utils');
 
 const argv = process.argv;
 const command = argv[ArgumentIndex.COMMAND_INDEX];
